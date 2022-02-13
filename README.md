@@ -1,3 +1,10 @@
+application url - https://jaxchat.vercel.app/ 
+1. application is hosted on vercel
+2. application description - a real time chatting app and is powered by firebase's real-time firestore
+3. uses server side rendering facilitated by NEXT JS
+
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started

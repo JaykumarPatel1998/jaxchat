@@ -1,5 +1,4 @@
 import { Button } from '@mui/material';
-import { signInWithPopup } from 'firebase/auth';
 import Head from 'next/head';
 import styled from "styled-components";
 import { auth, provider } from '../firebase';
@@ -7,7 +6,7 @@ import { auth, provider } from '../firebase';
 function Login() {
 
     const signIn = () => {
-        signInWithPopup(auth, provider).catch(alert);
+        auth.signInWithPopup(provider).catch(alert);
     }
 
   return (

@@ -5,27 +5,23 @@ import styled from "styled-components"
 import { auth, db } from "../firebase";
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { addDoc, collection, doc, getDocs, orderBy, query, serverTimestamp, setDoc, where } from "firebase/firestore";
 import { useRef, useState } from "react";
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import Message from "./Message";
 import MicIcon from '@mui/icons-material/Mic';
 import getRecipientEmail from "../utils/getRecipientEmail";
 import TimeAgo from "timeago-react";
+import { useCollection } from "react-firebase-hooks/firestore";
+import firebase from "firebase";
 
 function ChatScreen({chat, messages}) {
     const [user] = useAuthState(auth);
     const [input, setInput] = useState('')
     const router = useRouter();
     const endOfMessageRef = useRef(null);
-    const chatRef = doc(collection(db, 'chats'), router.query.id)
-    const [messageSnapshot, setmessageSnapshot] = useState(null)
-    const [recipientSnapshot, setrecipientSnapshot] = useState(null)
-    getDocs(query(collection(chatRef, 'messages'), orderBy('timestamp', 'asc')))
-        .then(docs => setmessageSnapshot(docs));
-
-    getDocs(query(collection(db, 'users'), where('email', '==', getRecipientEmail(chat.users, user))))
-        .then(docs => setrecipientSnapshot(docs))
+    const recipientEmail = getRecipientEmail(chat.users, user);
+    const [messageSnapshot] = useCollection(db.collection('chats').doc(router.query.id).collection('messages').orderBy('timestamp', 'asc'))
+    const [recipientSnapshot] = useCollection(db.collection('users').where('email', '==', recipientEmail))
 
     const recipient = recipientSnapshot?.docs?.[0]?.data();
 
@@ -55,13 +51,14 @@ function ChatScreen({chat, messages}) {
 
     const sendMessage = (e) => {
         e.preventDefault();
-        const usersRef = doc(collection(db, 'users'), user.uid)
-        setDoc(usersRef, {
-            lastSeen: serverTimestamp()
+
+        //update the lastSeen
+        db.collection('users').doc(user.uid).set({
+            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true})
 
-        addDoc(collection(chatRef, 'messages'), {
-            timestamp: serverTimestamp(),
+        db.collection('chats').doc(router.query.id).collection('messages').add({
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             message : input,
             user: user.email,
             photoURL: user.photoURL
@@ -78,7 +75,6 @@ function ChatScreen({chat, messages}) {
         })
     }
 
-    const recipientEmail = getRecipientEmail(chat.users, user);
   return (
     <Container>
         <Header>
@@ -86,7 +82,7 @@ function ChatScreen({chat, messages}) {
                 recipient? (
                     <Avatar src={recipient?.photoURL}/>
                 ) : (
-                    <Avatar>{recipientEmail[0]}</Avatar>
+                    <Avatar>{recipientEmail?.[0]}</Avatar>
                 )
             }
 
@@ -147,6 +143,10 @@ const Input = styled.input`
     padding: 20px;
     margin-left: 15px;
     margin-right: 15px;
+
+    :focus {
+        border-bottom: 2px solid rgba(144, 80, 80, 1)
+    }
 `
 const InputContainer = styled.form`
     display: flex;
@@ -154,13 +154,13 @@ const InputContainer = styled.form`
     padding: 10px;
     position: sticky;
     bottom: 0;
-    background-color: white;
+    background-color: azure;
     z-index: 100;
 `
 
 const Header = styled.div`
     position: sticky;
-    background-color: #fff;
+    background-color: azure;
     z-index: 100;
     top: 0;
     display: flex;
@@ -183,12 +183,14 @@ const HeaderInformation = styled.div`
         color: gray;
     }
 `
-
 const HeaderIcons = styled.div``
 
 const MessageContainer = styled.div`
     padding: 30px;
-    background-color:#905050;
+    background-image: url('/jax.png');
+    background-size: 300px 300px;
+    background-color: rgba(144, 80, 80, 0.1);;
+    background-repeat: repeat;
     min-height: 90vh;
 `
 

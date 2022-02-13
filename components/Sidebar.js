@@ -5,36 +5,24 @@ import { Avatar, IconButton } from '@mui/material';
 import Button from '@mui/material/Button';
 import SearchIcon from '@mui/icons-material/Search';
 import * as EmailValidator from 'email-validator';
-import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
-import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { useCollection } from 'react-firebase-hooks/firestore';
 import Chat from './Chat';
-import { useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 function Sidebar() {
-    // let snapshot;
-    // async function setSnapshot() {
-    //    snapshot = await getDocs(q)
-    // }
     const [user] = useAuthState(auth);
-    const userChatRef = collection(db, 'chats');
-    const q = query(userChatRef, where('users', 'array-contains', user.email));
-    const [snapshot, setsnapshot] = useState(null)
-    getDocs(q).then((docs) => {
-        setsnapshot(docs);
-    });
+    const userChatRef = db.collection('chats').where('users', 'array-contains', user.email);
+    const [snapshot] = useCollection(userChatRef);
 
     const createChat = () => {
         const input = prompt('Please enter the email address of the user you wish to connect');
         if (!input) return null;
 
         if (EmailValidator.validate(input) && !chatAlredyExists(input) && input !== user.email) {
-            const chatsRef = collection(db, "chats");
-            addDoc(chatsRef, {
+            db.collection('chats').add({
                 users: [user.email, input]
             })
-            .catch(alert);
         }
 
     };
@@ -48,7 +36,7 @@ function Sidebar() {
     return (
         <Container>
             <Header>
-                <UserAvatar src={user?.photoURL} onClick={() => signOut(auth)} />
+                <UserAvatar src={user?.photoURL} onClick={() => auth.signOut()} />
 
                 <IconsContainer>
                     <IconButton>
@@ -84,7 +72,7 @@ export default Sidebar;
 
 const Container = styled.div`
     flex: 0.45;
-    border-right: 1px solid #905050;
+    border-right: 1px solid azure;
     overflow-y: scroll;
     height: 100vh;
     min-width: 300px;
@@ -128,7 +116,7 @@ const Header = styled.div`
     display: flex;
     position: sticky;
     top: 0;
-    background-color:rgba(144, 80, 80, 1);
+    background-color:azure;
     z-index: 1;
     justify-content: space-between;
     align-items: center;

@@ -1,8 +1,15 @@
+WELCOME TO JAX CHAT Readme
+
+
 application url - https://jaxchat.vercel.app/ 
 1. application is hosted on vercel
 2. application description - a real time chatting app and is powered by firebase's real-time firestore
 3. uses server side rendering facilitated by NEXT JS
 
+Authenticate in to the app via google auth
+![image](https://user-images.githubusercontent.com/85047980/153751614-33284280-ffcc-4faf-b640-0d0f653fbd51.png)
+
+app UI
 ![image](https://user-images.githubusercontent.com/85047980/153751427-04275c82-f606-4810-aa8b-3f41e01dc429.png)
 
 
